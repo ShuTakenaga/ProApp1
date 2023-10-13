@@ -24,31 +24,29 @@ def home(request):
     # context_object_name = 'account'
     # return render(request, 'home.html')
     
-    # template = loader.get_template('home.html')
+    template = loader.get_template('home.html')
     # accounts = Account.objects.all
     
     user = request.user
     
-    
-    
-    params = {
-        'user' : user
-    }
-    
-    # accounts = Account()
-    # accounts.user = user
-    # accounts.save()
+    accounts = Account()
+    accounts.user = user
     
     # accounts = FirstModel.objects.get(id == 9)
     
-    # context = {
-    #     'accounts' : accounts,
-    # }
+    context = {
+        'accounts' : accounts,
+    }
     
-    # return HttpResponse(template.render(context, request))
+    return HttpResponse(template.render(context, request))
     # return render(request, 'home.html', {accounts : accounts})
-    
-    return render(request, 'home.html', params)
+
+# class AccountCreate(LoginRequiredMixin, CreateView):
+#     template_name = 'accountcreate.html'
+#     model = Account
+#     fields = ('grade', 'department', 'schoolnumber', 'classnumber', 'furigana', 'name', 'birthdate', 'age', 'address', 'addressnumber', 'mobilenumber', 'promotion')
+#     success_url = reverse_lazy('home')
+#     login_url = '/login/'
     
 @login_required
 def account_create(request):
@@ -57,17 +55,18 @@ def account_create(request):
     # account['form'] = AccountForm()
     
     if request.method == 'POST':
-        account_form = AccountForm(request.POST)
+        form = AccountForm(request.POST)
         
         user = request.user
         
-        account = account_form.save(commit=False)
-        account.user = user
+        account = form.save(commit=False)
+        # account.grade = request.POST['grade']  # またはフォームから grade を取得する方法を使用
         
-        account = Account(**account_form.cleaned_data)
+        account = Account(**form.cleaned_data)
         
-        user.account.save()
+        # https://qiita.com/siruku6/items/5b1378eca8cfd7353143
         
+        # account.schoolnumber = schoolnumber
         account.save()
         
         return redirect(to = '/')

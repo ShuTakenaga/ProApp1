@@ -79,7 +79,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'application_form.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -136,9 +135,21 @@ AUTHENTICATION_BACKENDS = [
     'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'accountcreate'
+
 LOGOUT_URL = 'logout'
 LOGOUT_REDIRECT_URL = 'login'
+
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '114123038809-5lat3pugr6pnfj3696c43mp6hvmu5ntf.apps.googleusercontent.com'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+
+SESSION_COOKIE_AGE = 3600 # 1時間
+SESSION_SAVE_EVERY_REQUEST = True # 後にいずれかのページをロードしてから SESSION_COOKIE_AGE 秒後に期限切れ
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True # 設定された期限に関係なく、ブラウザを閉じたらセッションを終了
+
+# SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+
+# AUTH_USER_MODEL = 'application.Account'
+

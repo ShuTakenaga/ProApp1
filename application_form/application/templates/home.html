@@ -1,91 +1,47 @@
-{% comment %} {% load static %}
-<!DOCTYPE html>
-<html lang="ja">
+{% extends 'base.html' %}
 
-<head>
-    <meta charset="UTF-8" />
-
-    <meta http-equiv="X-UA-Compatible" content="ie=edge" />
-    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.1.3/dist/css/bootstrap.min.css" rel="stylesheet"
-        integrity="sha384-1BmE4kWBq78iYhFldvKuhfTAU6auU8tT94WrHftjDbrCEXSU1oBoqyl2QvZ6jIW3" crossorigin="anonymous">
-    <link rel="stylesheet" href="{% static 'css/index.css' %}" />
-    <!-- google login css-->
-    <link rel="stylesheet" href="{% static 'css/google.css' %}" />
-    <title>Django Social Auth</title>
-</head>
-
-<body>
-    <div class="container-fluid">
-        <div>
-            <h1 class="text-white text-center">{% block title %}{% endblock %}</h1>
-            <div class="card p-5">
-                <div class="row">
-                    <div class="col-sm-12 mb-3">
-                        <h4 class="text-center text-black">ようこそ{{ user.first_name }}さん</h4>
-                    </div>
-
-                    <div class="row">
-                        <div class="col-md-8 mx-auto my-2 order-md-1">
-                            <button class="login-with-google-btn">
-                                <a href="{% url 'logout' %}"> Logout</a>
-                            </button>
-                        </div>
-                    </div>
-                </div>
-            </div>
-        </div>
-    </div>
-</body>
-
-</html> {% endcomment %}
 {% load static %}
-<!DOCTYPE html>
-<html>
-  <head>
-    <meta charset="utf-8">
-    <title>申請書作成 ｰ アカウント情報登録</title>
-    <link rel="stylesheet" href="{% static 'css/account.css' %}" />
-  </head>
-  <body>
-    <div class="header">
-      <div class="header-logo">申請書作成</div>
-      <div class="header-list">
-        <a href="{% url 'logout' %}" class="btn btn--blue">ログアウト</a>
-      </div>
+
+{% block content %}
+
+  <div class="main">
+    <div class="copy-container">
+      <h2 class="title">ようこそ{{ user.username }}さん</h2>
+      <div>このページでは学生が就職の申請をする際に必要な就職手続き依頼書を作成することができます。</div>
     </div>
 
-    <div class="main">
-      <div class="copy-container">
-        <h2 class="title">アカウント情報登録</h2>
-        <div>このサイトでは学生が就職の申請をする際に必要な就職手続き依頼書を作成することができます。</div>
-      </div>
-      
-      <div class="contents">
-        <form method="post" action="test.html">
-          <p>名前</p>
-          <input type="text">
-          <p>フリガナ</p>
-          <input type="text">
-          <p>学年</p>
-          <input type="text">
-          <p>学籍番号</p>
-          <input type="text">
-          <p>生年月日</p>
-          <input type="date" name="calendar" max="9999-12-31">
-          <p>郵便番号</p>
-          <input type="text">
-          <p>住所</p>
-          <input type="text">
-          <p>電話番号</p>
-          <input type="text">
-          <p><input type="submit" value="会員登録を行う"></p>
-        </form>
-      </div>
-    
+    <div class="contents">
+      <p>名前 :
+        {{ user.last_name }}
+        {{ user.first_name }}</p>
+
+      <p>フリガナ :
+        {{ user.account.first_name_furigana }}</p>
+
+      <p>学年 :
+        {{ user.account.grade }}</p>
+
+      <p>学年 :
+        {{ user.account.department }}</p>
+
+      <p>学籍番号 :
+        {{ user.account.schoolnumber }}</p>
+
+      <p>生年月日 :
+        {{ user.account.birthdate }}</p>
+
+      <p>郵便番号 :
+        {{ user.account.addressnumber }}</p>
+
+      <p>住所 :
+        {{ user.account.address }}</p>
+
+      <p>電話番号 :
+        {{ user.account.mobilenumber }}</p>
+
     </div>
-    <div class="adjustment"> </div>
-    <div class="footer">
-      <div class="footer-logo">申請書作成</div>
-    </div>
-  </body>
-</html>
+  </div>
+
+  <div class="adjustment"></div>
+
+{% endblock content %}

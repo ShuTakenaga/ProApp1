@@ -23,47 +23,39 @@
 </head>
 
 <body>
-
-
     <div class="d-lg-flex half">
         <div class="bg order-1 order-md-2"></div>
         {% comment %} style="background-image: url('/static/images/bg_1.jpg');" {% endcomment %}
         <div class="contents order-2 order-md-1">
-
             <div class="container">
                 <div class="row align-items-center justify-content-center">
                     <div class="col-md-7">
                         <div class="mb-4">
-                            <h3>Sign In</h3>
+                            <h3>申請書作成アプリ</h3>
                             <p class="mb-4">django-social-auth</p>
                         </div>
                         <form action="#" method="post">
-                            <div class="social-login">
+                            {% comment %} <div class="social-login">
                                 <a href="{% url 'social:begin' 'google-oauth2' %}" 
                                     class="google btn d-flex justify-content-center align-items-center">
-                                    <span class="icon-google mr-3"></span> Sign in with Google
+                                    <span class="icon-google mr-3"></span> Googleアカウントを使って新規登録
                                 </a>
-                            </div>
+                            </div> {% endcomment %}
                             {% csrf_token %}
 
                             <div class="row">
                                 <div class="col-md-8 mx-auto my-2 order-md-1">
                                     <button class="login-with-google-btn">
-                                        <a href="{% url 'social:begin' 'google-oauth2' %}"> Sign in with Google</a>
+                                        <a href="{% url 'social:begin' 'google-oauth2' %}">Googleアカウントでログイン</a>
                                     </button>
                                 </div>
                             </div>
-
                         </form>
                     </div>
                 </div>
             </div>
         </div>
-
-
     </div>
-
-
 
     <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
     <script src="{% static 'js/popper.min.js' %}"></script>

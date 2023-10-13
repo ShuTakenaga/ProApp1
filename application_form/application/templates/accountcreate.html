@@ -1,0 +1,26 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class="main">
+    <div class="copy-container">
+      <h2 class="title">ようこそ{{ user.last_name }}さん</h2>
+      <div>このページでは学生が就職の申請をする際に必要な就職手続き依頼書を作成することができます。</div>
+    </div>
+
+    <div class="contents">
+      {% comment %} <form action="{% url 'accountcreate' %}" method="POST"> {% endcomment %}
+      <form method="POST" >
+        {% csrf_token %}
+        {{ form.as_p }}
+        <input type="hidden" name = 'schoolnumber' value = '{{ user.username }}'>
+        <input type="submit" value='register acccount'>
+      </form>
+    </div>
+  </div>
+
+  <div class="adjustment"></div>
+
+{% endblock content %}
