@@ -7,41 +7,21 @@
   <div class="main">
     <div class="copy-container">
       <h2 class="title">ようこそ{{ user.username }}さん</h2>
-      <div>このページでは学生が就職の申請をする際に必要な就職手続き依頼書を作成することができます。</div>
+      <div>このサービスでは学生が就職の申請をする際に必要な就職手続き依頼書を作成することができます。</div>
     </div>
 
     <div class="contents">
-      <p>名前 :
-        {{ user.last_name }}
-        {{ user.first_name }}</p>
-
-      <p>フリガナ :
-        {{ user.account.first_name_furigana }}</p>
-
-      <p>学年 :
-        {{ user.account.grade }}</p>
-
-      <p>学年 :
-        {{ user.account.department }}</p>
-
-      <p>学籍番号 :
-        {{ user.account.schoolnumber }}</p>
-
-      <p>生年月日 :
-        {{ user.account.birthdate }}</p>
-
-      <p>郵便番号 :
-        {{ user.account.addressnumber }}</p>
-
-      <p>住所 :
-        {{ user.account.address }}</p>
-
-      <p>電話番号 :
-        {{ user.account.mobilenumber }}</p>
-
+      <h3>
+        <a href="{% url 'company' %}">企業一覧を閲覧・申請書の作成</a>
+      </h3>
+      <p class="explanation">こちらのページでは学校側が掲示している企業の求人一覧を閲覧、または申請書の作成が可能です。</p>
+      <br>
+      <h3>
+        <a href="{% url 'information'%}">ユーザー情報を編集する</a>
+      </h3>
+      <p class="explanation">こちらのページでは登録している名前や生年月日、住所などのユーザー情報を変更及びアカウントの削除をすることができます。</p>
     </div>
-  </div>
 
-  <div class="adjustment"></div>
+    <div class="adjustment"></div>
 
-{% endblock content %}
+  {% endblock content %}

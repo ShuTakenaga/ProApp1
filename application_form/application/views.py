@@ -14,6 +14,8 @@ from .forms import AccountForm
 
 from django.contrib.auth.models import User
 
+from django.contrib import messages
+
 def login(request):
     return render(request, 'login.html')
 
@@ -52,6 +54,12 @@ def home(request):
     
 @login_required
 def account_create(request):
+    # データベースに Account レコードが存在するかチェック
+    if Account.objects.filter(user=request.user).exists():
+        # データが登録されている場合、別のページにリダイレクト
+        return redirect('/')  # リダイレクト先のURLを設定
+    
+    form_class = AccountForm
     # account = {}
         
     # account['form'] = AccountForm()
@@ -64,13 +72,26 @@ def account_create(request):
         account = account_form.save(commit=False)
         account.user = user
         
-        account = Account(**account_form.cleaned_data)
+        # account = Account(**account_form.cleaned_data)
         
-        user.account.save()
+        # user.account.save()
         
-        account.save()
+        # account.save()
         
-        return redirect(to = '/')
+        # user.save()
+        
+        # messages.success(request, 'アカウント作成が完了しました。')
+        # return render(request, 'information.html')
+        
+        account.submitted = True  # フォームが提出されたことをマーク
+        
+         # ここで schoolnumber フィールドに値を設定
+        account.schoolnumber = user.username
+
+        account.save()  # データベースに保存
+
+        messages.success(request, 'アカウント作成が完了しました。')
+        return render(request, 'information.html')
     
     else:
         form = AccountForm()
@@ -84,3 +105,16 @@ def account_create(request):
 @login_required
 def company(request):
     return render(request, 'company.html')
+
+@login_required
+def information(request):
+    
+    user = request.user
+    
+    
+    
+    params = {
+        'user' : user
+    }
+
+    return render(request, 'information.html', params)

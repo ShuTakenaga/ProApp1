@@ -1,34 +1,37 @@
 from django.db import models
-from django.contrib.auth.models import User, AbstractUser
-
+from django.contrib.auth.models import User
 
 CATEGORY = (('AD', 'デザイン科'), ('EE', '電気工学科'), ('ME', '機械電子工学科'), ('CS', '情報工学科'), ('AC', '専攻科'))
 
 # Create your models here.
 class Account(models.Model):
     user = models.OneToOneField(User, on_delete=models.CASCADE, null = True, blank = True)
-    grade = models.IntegerField()
+    grade = models.IntegerField(verbose_name='学年')
     
     department =  models.CharField(
         max_length = 50,
-        choices = CATEGORY
+        choices = CATEGORY,
+        verbose_name='学科'
     )
     
-    schoolnumber = models.CharField(max_length = 10)
-    classnumber = models.IntegerField()
+    schoolnumber = models.CharField(max_length = 10, verbose_name='学籍番号')
+    classnumber = models.IntegerField(verbose_name ='クラス番号')
     
-    first_name_furigana = models.CharField(max_length = 50)
-    last_name_furigana = models.CharField(max_length = 50)
+    last_name_furigana = models.CharField(max_length = 50, verbose_name='名字のふりがな')
+    first_name_furigana = models.CharField(max_length = 50, verbose_name='名前のふりがな')
     
-    birthdate = models.DateField()
     
-    age = models.IntegerField()
+    birthdate = models.DateField(verbose_name='生年月日')
     
-    address = models.CharField(max_length = 50)
-    addressnumber = models.IntegerField()
-    mobilenumber = models.IntegerField()
+    age = models.IntegerField(verbose_name='年齢')
     
-    promotion = models.BooleanField()
+    address = models.CharField(max_length = 50, verbose_name='住所')
+    addressnumber = models.IntegerField(verbose_name='郵便番号')
+    mobilenumber = models.IntegerField(verbose_name='携帯電話番号')
+    
+    promotion = models.BooleanField(verbose_name='条件付き進級者かどうか')
+    
+    submitted = models.BooleanField(default=False)  # フォーム提出状態を管理
     
     def __str__(self):
         return self.schoolnumber

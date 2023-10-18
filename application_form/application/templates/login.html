@@ -1,11 +1,12 @@
 {% load static %}
-<!doctype html>
+<!DOCTYPE html>
 <html lang="ja">
 
-<head>
-    <!-- Required meta tags -->
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
+  <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+
     <link href="https://fonts.googleapis.com/css?family=Roboto:300,400&display=swap" rel="stylesheet">
 
     <link rel="stylesheet" href="{% static 'fonts/icomoon/style.css' %}">
@@ -17,50 +18,148 @@
 
     <!-- Style -->
     <link rel="stylesheet" href="{% static 'css/style.css' %}">
-    <!-- google login css-->
-    <link rel="stylesheet" href="{% static 'css/google.css' %}" />
-    <title>Login #6</title>
-</head>
+  </head>
 
-<body>
-    <div class="d-lg-flex half">
-        <div class="bg order-1 order-md-2"></div>
-        {% comment %} style="background-image: url('/static/images/bg_1.jpg');" {% endcomment %}
-        <div class="contents order-2 order-md-1">
-            <div class="container">
-                <div class="row align-items-center justify-content-center">
-                    <div class="col-md-7">
-                        <div class="mb-4">
-                            <h3>申請書作成アプリ</h3>
-                            <p class="mb-4">django-social-auth</p>
-                        </div>
-                        <form action="#" method="post">
-                            {% comment %} <div class="social-login">
-                                <a href="{% url 'social:begin' 'google-oauth2' %}" 
-                                    class="google btn d-flex justify-content-center align-items-center">
-                                    <span class="icon-google mr-3"></span> Googleアカウントを使って新規登録
-                                </a>
-                            </div> {% endcomment %}
-                            {% csrf_token %}
-
-                            <div class="row">
-                                <div class="col-md-8 mx-auto my-2 order-md-1">
-                                    <button class="login-with-google-btn">
-                                        <a href="{% url 'social:begin' 'google-oauth2' %}">Googleアカウントでログイン</a>
-                                    </button>
-                                </div>
-                            </div>
-                        </form>
-                    </div>
+  <body>
+    <div class="text-center">
+      <nav class="navbar navbar navbar-expand-lg navbar-dark bg-info ">
+        <div class="container">
+          <a href="" class="square_btn" style = 'font-weight:bold'>申請書作成アプリ</a>
+          <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarSupportedContent"
+                  aria-controls="navbarSupportedContent" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+          </button>
+          
+          <div class="collapse navbar-collapse" id="navbarSupportedContent">
+            <ul></ul>
+            <ul class="navbar-nav mr-auto">
+              {% comment %} <% if !current_user.nil? %> {% endcomment %}
+            <li class="nav-item active">
+                
+            </li>
+            </ul>
+  
+            
+            <ul class="navbar-nav">
+                <li class="nav-item active">
+                <a class="nav-link" href="">
+                    ログインしていません</a>
+                </li>
+                <div class="dropdown">
+                <button class="btn btn-info dropdown-toggle" type="button" data-bs-toggle="dropdown" aria-expanded="false"></button>
+                <ul class="dropdown-menu">
+                  <li><a class="dropdown-item" href="{% url 'social:begin' 'google-oauth2' %}">ログイン</a></li>
+                </ul>
                 </div>
-            </div>
+            </ul>
+          </div>
         </div>
-    </div>
+      </nav>
+  
+      <div class="wrapper">
+        <div class="container">
+          <div class="jumbotron">
+            <div class="inner center-block">
+              <h1 style="font-weight: bold; font-size: 60px;" class="br-pc">申請書作成アプリ<br></h1>
+              <h1 style="font-size: 25px;" class="br-sp">Application Creation App</h1><br>
+              {% comment %} <h2 style="font-weight: bold;">申請書を<br class="br-sp">簡単に<br>作成しよう</h2><br> {% endcomment %}
+              <p>申請書作成アプリは、学生の就職や進学に必要な申請書を簡単に作成してくれるサービスです。</p><br>
+  
+              <div>
+                <a class="btn btn-outline-primary btn-lg" href='{% url 'social:begin' 'google-oauth2' %}'>Googleログイン</a>
+              </div>
+  
+            </div><br class="br-sp">
+          </div>
+        </div>
+      </div>
 
-    <script src="{% static 'js/jquery-3.3.1.min.js' %}"></script>
-    <script src="{% static 'js/popper.min.js' %}"></script>
-    <script src="{% static 'js/bootstrap.min.js' %}"></script>
-    <script src="{% static 'js/main.js' %}"></script>
+    </div>
+    
+    
+    <footer class="footer bg-info" id ='footer'><br class="br-pc">
+      <p class="text-center" style='color:white;'>Copyright © 2023 Application Creation App All Rights Reserved.  
+      </p>
+  </footer>
 </body>
 
 </html>
+
+<script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js" integrity="sha384-geWF76RCwLtnZ8qwWowPQNguL3RmwHVBC9FhGdlKrxdiJJigb/j/68SIy3Te4Bkz" crossorigin="anonymous"></script>
+
+<style>
+  .square_btn {
+    position: relative;
+    display: inline-block;
+    font-weight: 900;
+    padding: 0.25em 0.5em;
+    text-decoration: none;
+    color: #00BCD4;
+    background: #ECECEC;
+    border-radius: 0 15px 15px 0;
+  }
+body,
+html {
+  height: 100%;
+}
+
+#container {
+  width: 100%;
+  position: relative;
+  height: auto !important;
+  height: 100%;
+  min-height: 100%;
+}
+
+#contents {
+  padding-bottom: 100px;
+}
+
+#footer {
+  position: fixed;
+  bottom: 0;
+  width: 100%;
+  height: 80px;
+  background-color: #f5f5f5;
+}
+
+.jumbotron {
+  background-image: url("image/bg.png");
+  background-repeat: no-repeat;
+  background-size: cover;
+  background-position: left center;
+  color: white;
+  height: 100%;
+  width: 100%;
+}
+
+@media screen and (max-width: 650px) {
+  .jumbotron {
+    background-image: url("image/bg.png");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: left center;
+    color: white;
+    height: 900%;
+    width: 100%;
+  }
+}
+
+@font-face {
+  font-family: 'MyFont';
+  src: url("font/webfont.ttf");
+}
+
+.inner {
+  background-color: rgba(0, 0, 0, 0.75);
+  color: #fff;
+
+  padding: 20px;
+  border-radius: 20px;
+}
+
+.footer > .container {
+  padding-right: 15px;
+  padding-left: 15px;
+}
+</style>
