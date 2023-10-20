@@ -9,11 +9,6 @@ class AccountForm(forms.ModelForm):
         super(AccountForm, self).__init__(*args, **kwargs)
         for field in self.fields.values():
             field.widget.attrs['class'] = 'form-control'
-        
-        # if self.instance.user:
-        #     # schoolnumber フィールドに初期値を設定
-        #     if not self.instance.schoolnumber:
-        #         self.fields['schoolnumber'].initial = self.instance.user.username     
                 
     class Meta:
         model = Account
