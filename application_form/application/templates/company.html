@@ -18,17 +18,17 @@
     <br><br><br>
 
     <div class="table-wrap">
-      <table border="1" width="200" class="table">
+      <table border="1" style='table-layout: auto;' class="table">
         <tr>
           <th>求人番号</th>
-          <th>会社名</th>
+          <th style="width: 50%;">会社名</th>
           <th>AD</th>
           <th>EE</th>
           <th>ME</th>
           <th>CS</th>
           <th>全</th>
           <th>AC</th>
-          <th>都道府県</th>
+          <th style="white-space: nowrap;">都道府県</th>
           <th>住所</th>
           <th>TEL</th>
           <th>担当</th>
@@ -39,9 +39,9 @@
           <th>呼称</th>
           <th>資本金</th>
           <th>従業員(人)</th>
-          <th>業種</th>
-          <th>事業内容</th>
-          <th>職種</th>
+          <th style='white-space: nowrap; padding: 5px 110px; '>業種</th>
+          <th style='white-space: nowrap; padding: 15px 110px;'>事業内容</th>
+          <th style='white-space: nowrap; padding: 15px 110px;'>職種</th>
           <th>ホームページ</th>
           <th>メールアドレス</th>
           <th>既卒</th>
@@ -52,8 +52,12 @@
 
         {% for company in data %}
           <tr>
-            <td>{{ company.number }}</td>
-            <td>{{ company.name }}</td>
+            <td>
+              {{ company.number }}
+            </td>
+            <td>
+              <a href=' ' style=' font-weight:bold;'="font-weight:bold;' ">{{ company.name }}</a>
+            </td>
             <td>{{ company.AD }}</td>
             <td>{{ company.EE }}</td>
             <td>{{ company.ME }}</td>
@@ -164,13 +168,13 @@
   .table {
     width: 100%;
     border-collapse: collapse;
-    white-space: nowrap;
+
   }
 
   .table td,
   .table th {
     border: 2px solid #eee;
-    padding: 4px 8px;
+
   }
 </style>
 

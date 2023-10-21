@@ -29,7 +29,7 @@ class Account(models.Model):
     addressnumber = models.IntegerField(verbose_name='郵便番号')
     mobilenumber = models.IntegerField(verbose_name='携帯電話番号')
     
-    promotion = models.BooleanField(verbose_name='条件付き進級者かどうか')
+    promotion = models.BooleanField(verbose_name='条件付き進級者')
     
     submitted = models.BooleanField(default=False)  # フォーム提出状態を管理
     
