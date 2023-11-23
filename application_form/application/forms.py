@@ -30,3 +30,6 @@ class AccountForm(forms.ModelForm):
                 "type": "date"
             })
         }
+
+class CompanySearchForm(forms.Form):
+    search_keyword = forms.CharField(label = 'Search', max_length=100, required=False)

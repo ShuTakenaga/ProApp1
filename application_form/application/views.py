@@ -10,7 +10,7 @@ from django import template
 from django.contrib.auth.mixins import LoginRequiredMixin
 
 from .models import Account, Company
-from .forms import AccountForm
+from .forms import AccountForm, CompanySearchForm
 
 from django.contrib.auth.models import User
 
@@ -22,6 +22,7 @@ from django.core.files.storage import FileSystemStorage
 
 from django.db.utils import IntegrityError
 
+from django.core.paginator import Paginator, EmptyPage
 
 def is_superuser(user):
     return user.is_superuser
@@ -212,6 +213,34 @@ def upload_excel(request):
 #     return render(request, 'upload_excel.html')
 
 @login_required
-def company(request):
-    data = Company.objects.all()
-    return render(request, 'company.html', {'data': data})  
+def company(request, num=1):
+    # Get the search keyword from the request
+    search_keyword = request.GET.get('search_keyword', '')
+
+    # If there's a search query, filter the data
+    if search_keyword:
+        data = Company.objects.filter(number__icontains=search_keyword) | Company.objects.filter(name__icontains=search_keyword)
+    else:
+        # If no search query, display all data
+        data = Company.objects.all()
+
+    # Pagination logic remains the same
+    page = Paginator(data, 50)
+    
+    # try:
+    #     # Try to get the requested page number
+    #     current_page = page.page(num)
+    # except EmptyPage:
+    #     # If the requested page is out of range, redirect to the last page
+    #     return redirect('company', num=page.num_pages)
+
+    # params = {
+    #     'data': current_page,
+    #     'search_keyword': search_keyword,  # Pass the search keyword to the template
+    # }
+    
+    params = {
+        'data': page.get_page(num)  # Always display the first page initially
+    }
+    
+    return render(request, 'company.html', params)

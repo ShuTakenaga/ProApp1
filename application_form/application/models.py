@@ -67,3 +67,6 @@ class Company(models.Model):
     disabled = models.CharField(max_length=100, verbose_name='障害者採用', null=True, blank=True)
     PDF = models.CharField(max_length=100)
     date = models.DateField(verbose_name='日付')
+    
+    def __str__(self):
+        return self.name

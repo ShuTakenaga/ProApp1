@@ -4,49 +4,49 @@
 
 {% block content %}
 
-  <div class='container'>
+  <div class='container mt-4'>
     <br>
     <p>企業番号または企業名を入力することでこちらから企業検索をすることができます。</p>
 
-    <form action="#" class="search-form-002">
-      <label>
-        <input type="text" placeholder="キーワードを入力">
-      </label>
-      <button type="submit" aria-label="検索"></button>
+    <form method='get' id="search-form">
+      <label class = 'form-label'>検索</label>
+      <input type="text" id="search_keyword" name="search_keyword" class='form-control' placeholder="企業番号または企業名を入力" value="{{ request.GET.search_keyword }}">
+      <button type="submit" aria-label="検索" class="btn btn-info">Search</button>
+      <button type="button" aria-label="クリア" onclick='clearSearch()' class="btn btn-outline-info">Clear</button>
     </form>
 
     <br><br><br>
 
-    <div class="table-wrap">
-      <table border="1" style='table-layout: auto;' class="table">
+    <div class="table-wrap table-responsive">
+      <table class="table table-striped border">
         <tr>
           <th>求人番号</th>
-          <th style="width: 50%;">会社名</th>
+          <th>会社名</th>
           <th>AD</th>
           <th>EE</th>
           <th>ME</th>
           <th>CS</th>
           <th>全</th>
           <th>AC</th>
-          <th style="white-space: nowrap;">都道府県</th>
+          <th>都道府県</th>
           <th>住所</th>
-          <th>TEL</th>
-          <th>担当</th>
+          {% comment %} <th>TEL</th>
+          <th>担当</th> {% endcomment %}
           <th>勤務地</th>
           <th>推薦/自由</th>
-          <th>応募方法</th>
+          {% comment %} <th>応募方法</th> {% endcomment %}
           <th>選考日</th>
-          <th>呼称</th>
+          {% comment %} <th>呼称</th>
           <th>資本金</th>
-          <th>従業員(人)</th>
-          <th style='white-space: nowrap; padding: 5px 110px; '>業種</th>
-          <th style='white-space: nowrap; padding: 15px 110px;'>事業内容</th>
-          <th style='white-space: nowrap; padding: 15px 110px;'>職種</th>
+          <th>従業員(人)</th> {% endcomment %}
+          <th>業種</th>
+          {% comment %} <th>事業内容</th> {% endcomment %}
+          <th>職種</th>
           <th>ホームページ</th>
-          <th>メールアドレス</th>
+          {% comment %} <th>メールアドレス</th> {% endcomment %}
           <th>既卒</th>
           <th>障がい者採用</th>
-          <th>PDF</th>
+          {% comment %} <th>PDF</th> {% endcomment %}
           <th>日付</th>
         </tr>
 
@@ -55,34 +55,70 @@
             <td>
               {{ company.number }}
             </td>
-            <td>
-              <a href=' ' style=' font-weight:bold;'="font-weight:bold;' ">{{ company.name }}</a>
+            <td class='company'>
+              <a href="#" style='font-weight:bold;' onclick="openModal('{{ company.name }}', '{{ company.address }}', '{{ company.tel }}', '{{ company.web }}', '{{ company.detail | escapejs }}')">{{ company.name }}</a>
             </td>
-            <td>{{ company.AD }}</td>
-            <td>{{ company.EE }}</td>
-            <td>{{ company.ME }}</td>
-            <td>{{ company.CS }}</td>
-            <td>{{ company.ALL }}</td>
-            <td>{{ company.AC }}</td>
+            <td>
+              {% if company.AD %}
+                {{ company.AD }}
+              {% endif %}
+            </td>
+            <td>
+              {% if company.ED %}
+                {{ company.ED }}
+              {% endif %}
+            </td>
+            <td>
+              {% if company.ME %}
+                {{ company.ME }}
+              {% endif %}
+            </td>
+            <td>
+              {% if company.CS %}
+                {{ company.CS }}
+              {% endif %}
+            </td>
+            <td>
+              {% if company.ALL %}
+                {{ company.ALL }}
+              {% endif %}
+            </td>
+            <td>
+              {% if company.AC %}
+                {{ company.AC }}
+              {% endif %}
+            </td>
             <td>{{ company.prefecture }}</td>
             <td>{{ company.address }}</td>
-            <td>{{ company.tel }}</td>
-            <td>{{ company.PIC }}</td>
-            <td>{{ company.workplace }}</td>
+            {% comment %}<td>{{ company.tel }}</td> 
+            <td>{{ company.PIC }}</td>{% endcomment %}
+            <td>
+              {% if company.workplace != 'nan' %}
+                {{ company.workplace }}
+              {% endif %}
+            </td>
             <td>{{ company.qualified }}</td>
-            <td>{{ company.method }}</td>
+            {% comment %} <td>{{ company.method }}</td> {% endcomment %}
             <td>{{ company.selection_day }}</td>
-            <td>{{ company.naming }}</td>
+            {% comment %} <td>{{ company.naming }}</td>
             <td>{{ company.money }}</td>
-            <td>{{ company.employee }}</td>
+            <td>{{ company.employee }}</td> {% endcomment %}
             <td>{{ company.type }}</td>
-            <td>{{ company.detail }}</td>
+            {% comment %} <td>{{ company.detail }}</td> {% endcomment %}
             <td>{{ company.occupation }}</td>
-            <td>{{ company.web }}</td>
-            <td>{{ company.mail }}</td>
-            <td>{{ company.graduated }}</td>
-            <td>{{ company.disabled }}</td>
-            <td>{{ company.PDF }}</td>
+            <td><a href='{{ company.web }}'>{{ company.web }}</a></td>
+            {% comment %} <td>{{ company.mail }}</td> {% endcomment %}
+            <td>
+              {% if company.graduated != 'nan' %}
+                {{ company.graduated }}
+              {% endif %}
+            </td>
+            <td>
+              {% if company.disabled != 'nan' %}
+                {{ company.disabled }}
+              {% endif %}
+            </td>
+            {% comment %} <td>{{ company.PDF }}</td> {% endcomment %}
             <td>{{ company.date }}</td>
           </tr>
         {% endfor %}
@@ -90,92 +126,171 @@
       </table>
     </div>
   </div>
+
+  <div id="companyModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modalCompanyName"></h2>
+      <p id="modalCompanyAddress"></p>
+      <p id="modalCompanyTel"></p>
+      <p id="modalCompanyWeb"></p>
+      <p id="modalCompanyDetail">{{ company.detail }}</p>
+      <button type="button" class="neumophic-btn btn btn-info">申請</button>
+    </div>
+  </div>
+
+
+  <nav>
+    <ul class='pagination'>
+      {% if data.has_previous %}
+        <li>
+          <a class='page-link text-primary d-inline-block' href="{% url 'company_pagination' num=data.previous_page_number %}{% if request.GET.search_keyword %}?search_keyword={{ request.GET.search_keyword }}{% endif %}">back</a>
+        </li>
+      {% else %}
+        <li class='disabled'>
+          <div class='page-link text-secondary d-inline-block disabled' href='#'>back</div>
+        </li>
+      {% endif %}
+
+      {% for link_page in data.paginator.page_range %}
+        {% if link_page %}
+          {% if link_page == data.number %}
+            <li class='disabled'>
+              <div class='page-link text-secondary d-inline-block disabled' href='#'>
+                {{ link_page }}
+              </div>
+            </li>
+          {% else %}
+            <li>
+              <a class='page-link text-primary d-inline-block' href="{% url 'company_pagination' num=link_page %}{% if request.GET.search_keyword %}?search_keyword={{ request.GET.search_keyword }}{% endif %}">{{ link_page }}</a>
+            </li>
+          {% endif %}
+        {% else %}
+          <li class='disabled'>
+            <a class='page-link text-secondary d-inline-block text-muted' href="#">...</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if data.has_next %}
+        <li>
+          <a class='page-link text-primary d-inline-block' href="{% url 'company_pagination' num=data.next_page_number %}{% if request.GET.search_keyword %}?search_keyword={{ request.GET.search_keyword }}{% endif %}">next</a>
+        </li>
+      {% else %}
+        <li class='disabled'>
+          <div class='page-link text-secondary d-inline-block disabled' href='#'>next</div>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
 </div>
 
 {% block footer %}{% endblock footer %}
 
 <style>
-  .search-form-002 {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    overflow: hidden;
-    border: 2px solid #3979da;
-    border-radius: 25px;
-  }
 
-  .search-form-002 input {
-    width: 250px;
-    height: 45px;
-    padding: 5px 15px;
-    border: none;
-    box-sizing: border-box;
-    font-size: 1em;
-    outline: none;
-  }
-
-  .search-form-002 input::placeholder {
-    color: #767d83;
-  }
-
-  .search-form-002 button {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 50px;
-    height: 45px;
-    border: none;
-    background-color: #3979da;
-    cursor: pointer;
-  }
-
-  .search-form-002 button::after {
-    width: 20px;
-    height: 20px;
-    background-image: url("data:image/svg+xml;charset=utf8,%3Csvg%20xmlns%3D%22http%3A%2F%2Fwww.w3.org%2F2000%2Fsvg%22%20viewBox%3D%220%200%2024%2024%22%3E%20%3Cpath%20d%3D%22M23.7%2020.8%2019%2016.1c-.2-.2-.5-.3-.8-.3h-.8c1.3-1.7%202-3.7%202-6C19.5%204.4%2015.1%200%209.7%200S0%204.4%200%209.7s4.4%209.7%209.7%209.7c2.3%200%204.3-.8%206-2v.8c0%20.3.1.6.3.8l4.7%204.7c.4.4%201.2.4%201.6%200l1.3-1.3c.5-.5.5-1.2.1-1.6zm-14-5.1c-3.3%200-6-2.7-6-6s2.7-6%206-6%206%202.7%206%206-2.6%206-6%206z%22%20fill%3D%22%23fff%22%3E%3C%2Fpath%3E%20%3C%2Fsvg%3E");
-    background-repeat: no-repeat;
-    content: '';
-  }
-
-  .section-title {
-    border-bottom: 3px solid #dee7ec;
-    font-size: 20px;
-    padding-bottom: 10px;
-    margin-bottom: 40px;
-    text-decoration: none;
-  }
-
-  a:link {
-    color: #000000;
-  }
-
-  a:visited {
-    color: #000000;
-  }
-
-  a:hover {
-    color: #000000;
-  }
-
-  a:active {
-    color: #000000;
-  }
-
-  .table-wrap {
-    overflow-x: scroll;
-  }
-
-  .table {
-    width: 100%;
-    border-collapse: collapse;
-
-  }
-
-  .table td,
   .table th {
     border: 2px solid #eee;
+    white-space: nowrap;
+  }
 
+  .table td {
+    border: 2px solid #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    position: relative;
+  }
+
+  .table td:hover{
+    overflow: visible;
+    white-space: normal;
+    z-index: 1;
+  }
+
+  .tooltip {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 10px;
+    z-index: 2;
+  }
+
+  .table td:hover .tooltip{
+    display: block;
+  }
+
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+  }
+  
+  .modal-content {
+    width: 100%; /* Adjust the width as needed */
+    max-width: 800px; /* Set a maximum width if desired */
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    margin: auto; /* Center the modal horizontally */
+  }
+  
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
   }
 </style>
+
+<script>
+  function openModal(name, address, tel, web, detail) {
+    document.getElementById('modalCompanyName').innerHTML = name;
+    document.getElementById('modalCompanyAddress').innerHTML = '住所: ' + address;
+    document.getElementById('modalCompanyTel').innerHTML = 'TEL: ' + tel;
+    document.getElementById('modalCompanyWeb').innerHTML = 'Website: ' + web;
+    document.getElementById('modalCompanyDetail').innerHTML = '詳細:' + detail;
+  
+    // Set the display property to 'flex' when opening the modal
+    document.getElementById('companyModal').style.display = 'flex';
+  }
+  
+  function closeModal() {
+    // Set the display property to 'none' when closing the modal
+    document.getElementById('companyModal').style.display = 'none';
+  }
+  
+  // Close modal if the user clicks outside of it
+  window.onclick = function (event) {
+    var modal = document.getElementById('companyModal');
+    if (event.target == modal) {
+      closeModal();
+    }
+  };
+
+  function clearSearch() {
+    // Get the search input element by its ID
+    var searchInput = document.getElementById('search_keyword');
+  
+    // Check if the search input element exists
+    if (searchInput) {
+      // Set the value of the search input to an empty string
+      searchInput.value = '';
+    }
+  }
+</script>
 
 {% endblock content%}

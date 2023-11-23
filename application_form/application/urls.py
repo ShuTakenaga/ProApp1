@@ -13,6 +13,7 @@ urlpatterns = [
     # path('accountcreate/', AccountCreate.as_view(), name = 'accountcreate'),
     path('accountcreate/', views.account_create, name = 'accountcreate'),
     path('company/', views.company, name = 'company'),
+    path('company/<int:num>/', views.company, name = 'company_pagination'),
     path("information/", views.information, name='information'),
     path('upload_excel/', views.upload_excel, name='upload_excel')
 ]
