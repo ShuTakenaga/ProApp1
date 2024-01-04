@@ -1,4 +1,4 @@
-from django.shortcuts import render, redirect
+from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
 
 from django.views.generic import CreateView
@@ -9,8 +9,8 @@ from django.template import context, loader
 from django import template
 from django.contrib.auth.mixins import LoginRequiredMixin
 
-from .models import Account, Company
-from .forms import AccountForm, CompanySearchForm
+from .models import Account, Company, Application
+from .forms import AccountForm, CompanySearchForm, ApplicationForm, EditAccountForm, EditApplicationForm
 
 from django.contrib.auth.models import User
 
@@ -23,6 +23,23 @@ from django.core.files.storage import FileSystemStorage
 from django.db.utils import IntegrityError
 
 from django.core.paginator import Paginator, EmptyPage
+
+from reportlab.pdfgen import canvas
+from reportlab.lib.pagesizes import letter
+from PyPDF2 import PdfReader, PdfWriter
+from django.templatetags.static import static
+
+from reportlab.pdfbase.cidfonts import UnicodeCIDFont
+
+from io import BytesIO
+import os
+
+from reportlab.pdfbase import pdfmetrics
+from reportlab.pdfbase.ttfonts import TTFont
+
+from django.db.models import Q
+
+
 
 def is_superuser(user):
     return user.is_superuser
@@ -91,7 +108,26 @@ def information(request):
     else:
         return redirect('accountcreate')  # リダイレクト先のURLを設定
     
-    
+@login_required
+def edit_account(request):
+    if Account.objects.filter(user=request.user).exists():
+        user = request.user
+
+        if request.method == 'POST':
+            form = EditAccountForm(request.POST, instance=user.account)
+
+            if form.is_valid():
+                form.save()
+                messages.success(request, 'アカウント情報が正常に更新されました。')
+                return redirect('information')
+            else:
+                messages.error(request, 'フォーム内のエラーを修正してください。')
+        else:
+            form = EditAccountForm(instance=user.account)
+
+        return render(request, 'edit_account.html', {'form': form})
+    else:
+        return redirect('accountcreate')
 
 @user_passes_test(is_superuser)
 def upload_excel(request):
@@ -115,9 +151,11 @@ def upload_excel(request):
                 pass
 
             for _, row in df.iterrows():
+                company_name = row['会社名'].replace('\n', '').replace('\r', '')
+                
                 Company.objects.create(
                     number=convert_to_int(row['求人番号']),
-                    name=row['会社名'],
+                    name=company_name,
                     AD=convert_to_int(row['AD']),
                     EE=convert_to_int(row['EE']),
                     ME=convert_to_int(row['ME']),
@@ -149,98 +187,278 @@ def upload_excel(request):
             return redirect('company')
     return render(request, 'upload_excel.html')
 
-
-
-# @user_passes_test(is_superuser)
-# def upload_excel(request):
-#     if request.method == 'POST' and request.FILES['excel_file']:
-#         excel_file = request.FILES['excel_file']
-#         fs = FileSystemStorage()
-#         filename = fs.save(excel_file.name, excel_file)
-#         file_url = fs.url(filename)
-
-#         # データベースにExcelデータを保存するコード
-#         data = pd.read_excel(excel_file, header=2)  # 3行目をヘッダー行としない
-
-#         def nan_to_none(value):
-#             return None if pd.isna(value) else value
-
-#         def convert_to_int(value):
-#             if pd.notna(value):
-#                 try:
-#                     return int(value)
-#                 except (ValueError, TypeError):
-#                     return None
-#             return None
-
-#         for index, row in data.iterrows():
-#             try:
-#                 company = Company(
-#                     number=convert_to_int(row.get('求人番号')),
-#                     name=row.get('会社名'),
-#                     AD=convert_to_int(row.get('AD')),
-#                     EE=convert_to_int(row.get('EE')),
-#                     ME=convert_to_int(row.get('ME')),
-#                     CS=convert_to_int(row.get('CS')),
-#                     ALL=convert_to_int(row.get('全')),
-#                     AC=convert_to_int(row.get('AC')),
-#                     prefecture=row.get('都道府県'),
-#                     address=row.get('住所'),
-#                     tel=convert_to_int(row.get('℡')),
-#                     PIC=row.get('担当'),
-#                     workplace=row.get('勤務地'),
-#                     qualified=row.get('推薦/自由'),
-#                     method=row.get('応募方法'),
-#                     selection_day=row.get('選考日'),
-#                     naming=row.get('呼称'),
-#                     money=row.get('資本金'),
-#                     employee=convert_to_int(row.get('従業員(人)')),
-#                     type=row.get('業種'),
-#                     detail=row.get('事業内容'),
-#                     occupation=row.get('職種'),
-#                     web=row.get('ﾎｰﾠﾍﾟｰｼﾞ'),
-#                     mail=row.get('メールアドレス'),
-#                     date=row.get('日付'),
-#                 )
-#                 company.save()
-#             except IntegrityError:
-#                 # 例外処理: データの保存時に一意制約違反が発生した場合
-#                 # 既に同じ求人番号のデータが存在している可能性があるため、スキップする
-#                 continue
-
-#         return render(request, 'upload_excel.html', {'file_url': file_url})
-
-#     return render(request, 'upload_excel.html')
-
 @login_required
 def company(request, num=1):
-    # Get the search keyword from the request
-    search_keyword = request.GET.get('search_keyword', '')
+    if Account.objects.filter(user=request.user).exists():
+        # Get the search keyword from the request
+        search_keyword = request.GET.get('search_keyword', '')
+        
+        user_department = request.user.account.department
+        
+        # If there's a search query, filter the data
+        if search_keyword:
+            if user_department == 'ME':
+                    data = Company.objects.filter(Q(ALL=True)| Q(ME=True) )
+                    data = data.filter(number__icontains=search_keyword) | data.filter(name__icontains=search_keyword)
+        else:
+            if user_department == 'AD':
+                data = Company.objects.filter(Q(AD__isnull=False) | Q(ALL__isnull=False))
+            elif user_department == 'EE':
+                data = Company.objects.filter(Q(EE__isnull=False) | Q(ALL__isnull=False))
+            elif user_department == 'ME':
+                data = Company.objects.filter(Q(ME__isnull=False) | Q(ALL__isnull=False))
+            elif user_department == 'CS':
+                data = Company.objects.filter(Q(CS__isnull=False) | Q(ALL__isnull=False))
+            elif user_department == 'AC':
+                data = Company.objects.filter(Q(AC__isnull=False))
+            # If no search query, display all data
 
-    # If there's a search query, filter the data
-    if search_keyword:
-        data = Company.objects.filter(number__icontains=search_keyword) | Company.objects.filter(name__icontains=search_keyword)
+        # Pagination logic remains the same
+        page = Paginator(data, 50)
+        
+        params = {
+            'data': page.get_page(num)  # Always display the first page initially
+        }
+        
+        return render(request, 'company.html', params)
     else:
-        # If no search query, display all data
-        data = Company.objects.all()
-
-    # Pagination logic remains the same
-    page = Paginator(data, 50)
+        return redirect('accountcreate')
     
-    # try:
-    #     # Try to get the requested page number
-    #     current_page = page.page(num)
-    # except EmptyPage:
-    #     # If the requested page is out of range, redirect to the last page
-    #     return redirect('company', num=page.num_pages)
+@login_required
+def application_create(request, company_name):
+    if Account.objects.filter(user=request.user).exists():
+        company = get_object_or_404(Company, name=company_name)
 
-    # params = {
-    #     'data': current_page,
-    #     'search_keyword': search_keyword,  # Pass the search keyword to the template
-    # }
+        # 既存の申請書を取得
+        existing_application = Application.objects.filter(user=request.user, company=company).first()
+
+        if existing_application:
+            # 既に申請している場合、申請書の詳細画面にリダイレクト
+            return redirect('application_detail', pk=existing_application.pk)
+
+        if request.method == 'POST':
+            form = ApplicationForm(request.POST)
+
+            user = request.user
+
+            if form.is_valid():
+                application = form.save(commit=False)
+                application.user = user
+                application.company = company  # companyを使用
+                application.save()
+                return redirect('application_detail', pk=application.pk)
+        else:
+            if company.qualified == '推薦':
+                form = ApplicationForm(initial={
+                    'submit_company': company.name,
+                    'submit_address': company.prefecture + company.address,
+                    'submit_tel': company.tel,
+                    'qualified': True,
+                })  # 初期値としてcompany.nameを設定
+            else:
+                form = ApplicationForm(initial={
+                    'submit_company': company.name,
+                    'submit_address': company.prefecture + company.address,
+                    'submit_tel': company.tel,
+                })  # 初期値としてcompany.nameを設定
+
+        return render(request, 'application_create.html', {'form': form})
+    else:
+        return redirect('accountcreate')
+@login_required
+def edit_application(request, pk):
+    application = get_object_or_404(Application, pk=pk)
+
+    # 編集権限の確認
+    if application.user != request.user:
+        return redirect('application_list')  # ログインユーザーと申請のユーザーが一致しない場合はリダイレクト
+
+    if request.method == 'POST':
+        form = ApplicationForm(request.POST, instance=application)
+        if form.is_valid():
+            form.save()
+            return redirect('application_detail', pk=pk)
+    else:
+        form = ApplicationForm(instance=application)
+
+    return render(request, 'edit_application.html', {'form': form})
+
+@login_required
+def application_detail(request, pk):
+    application = get_object_or_404(Application, pk=pk)
+    user = request.user
+    
+    # 編集権限の確認
+    if application.user != request.user:
+        return redirect('application_list')  # ログインユーザーと申請のユーザーが一致しない場合はリダイレクト
+
+    context = {
+        'user': user,
+        'application': application,
+    }
+
+    return render(request, 'application_detail.html', context)
+
+# @login_required
+# def edit_application(request, pk):
+#     application = get_object_or_404(Application, pk=pk)
+
+#     if request.method == 'POST':
+#         form = ApplicationForm(request.POST, instance=application)
+#         if form.is_valid():
+#             form.save()
+#             return redirect('application_detail', pk=pk)
+#     else:
+#         form = ApplicationForm(instance=application)
+
+#     return render(request, 'edit_application.html', {'form': form})
+
+def generate_pdf(request, pk):
+    application = get_object_or_404(Application, pk=pk)
+    user = request.user
+
+    # Load the existing PDF template
+    template_path = 'application/static/pdf/test.pdf'
+
+    template_pdf = PdfReader(template_path)
+
+    # Create a new PDF to write the result
+    result_pdf = PdfWriter()
+
+    # Add the existing template pages to the result PDF
+    for page in template_pdf.pages:
+        result_pdf.add_page(page)
+
+    # font_path = 'application/static/fonts/ipaexm.ttf'
+
+    # PDFにフォントを登録
+    # pdfmetrics.registerFont(TTFont('ipa', 'application/static/fonts/ipaexm.ttf'))
+    
+    pdfmetrics.registerFont(UnicodeCIDFont('HeiseiMin-W3'))
+
+
+    # Create a canvas to draw on the result PDF
+    packet = BytesIO()
+    can = canvas.Canvas(packet, pagesize=letter)
+    
+    can.setFont('HeiseiMin-W3', 10)
+    can.drawString(125, 715, user.account.last_name_furigana + '     ' + user.account.first_name_furigana)
+    can.drawString(84, 729, f'{user.account.grade}')
+    
+    can.drawString(245, 729, f'{user.account.classnumber}')
+    can.drawString(375, 729, f'{user.account.schoolnumber}')
+    
+    can.drawString(132, 659, str(user.account.addressnumber)[0:3] + '    ' + str(user.account.addressnumber)[3:])
+    
+    can.drawString(132, 578, str(application.submit_address_number)[0:3] + '    ' + str(application.submit_address_number)[3:])
+    
+    can.setFont('HeiseiMin-W3', 12)
+
+    # Draw your data on the canvas
+    can.drawString(416, 780, str(application.created_at)[0:4] +'    ' + str(application.created_at)[5:7] + '    ' + str(application.created_at)[8:10])
+    
+    if user.account.department == 'AD':
+        can.drawString(114, 728, '○')
+        
+    if user.account.department == 'EE':
+        can.drawString(136, 728, '○')
+        
+    if user.account.department == 'ME':
+        can.drawString(158, 728, '○')
+        
+    if user.account.department == 'CS':
+        can.drawString(179, 728, '○')
+    
+    if user.account.department == 'AC':
+        can.drawString(201, 728, '○')
+    
+    can.drawString(125, 670, str(user.account.birthdate)[0:4] + '            ' + str(user.account.birthdate)[5:7] + '           ' + str(user.account.birthdate)[8:])
+    can.drawString(276, 670, f'{user.account.age}')
+    can.drawString(125, 642, f'{user.account.address}')
+    can.drawString(125, 620, '0' + str(user.account.mobilenumber))
+    
+    can.drawString(200, 590, f'{application.submit_company}')
+    can.drawString(125, 561, f'{application.submit_address}')
+    can.drawString(125, 540, f'{application.submit_tel}')
+    
+    can.drawString(199, 392, str(application.deadline)[5:7] + '       ' + str(application.deadline)[8:])
+    
+    
+    
+    can.setFont('HeiseiMin-W3', 17)
+
+    can.drawString(125, 688, user.last_name + '     ' + user.first_name)
+    
+    can.drawString(274, 511, '○')
+    
+    can.drawString(287, 482, '○')
+    
+    can.setFont('HeiseiMin-W3', 20)
+    if application.qualified == True:
+        can.drawString(74, 587, '○')
+    else:
+        can.drawString(122, 587, '○')
+        
+    can.setFont('HeiseiMin-W3', 10)
+    
+    graduation_certificate = application.graduation_certificate if application.graduation_certificate is not None else 0
+    expected_graduation_certificate = application.expected_graduation_certificate if application.expected_graduation_certificate is not None else 0
+    transcript_main = application.transcript_main if application.transcript_main is not None else 0
+    transcript_major = application.transcript_major if application.transcript_major is not None else 0
+    health_form = application.health_form if application.health_form is not None else 0
+    recommendation_president = application.recommendation_president if application.recommendation_president is not None else 0
+    recommendation_department = application.recommendation_department if application.recommendation_department is not None else 0
+    survey = application.survey if application.survey is not None else 0
+    unit_certificate = application.unit_certificate if application.unit_certificate is not None else 0
+    syllabus = application.syllabus if application.syllabus is not None else 0
+    # 他の変数も同様に処理
+
+    can.drawString(358, 339, str(graduation_certificate) + '                            ' + str(graduation_certificate * 600))
+    can.drawString(358, 327, str(expected_graduation_certificate) + '                            ' + str(expected_graduation_certificate * 600))
+    can.drawString(358, 315, str(transcript_main) + '                            ' + str(transcript_main * 1000))
+    can.drawString(358, 303, str(transcript_major) + '                            ' + str(transcript_major * 1000))
+    can.drawString(358, 290, str(health_form) + '                            ' + str(health_form * 500))
+    can.drawString(358, 278, str(recommendation_president) + '                            ' + str(recommendation_president * 1000))
+    can.drawString(358, 265, str(recommendation_department) + '                            ' + str(recommendation_department * 0))
+    can.drawString(358, 252, str(survey) + '                            ' + str(survey * 2000))
+    can.drawString(358, 238, str(unit_certificate) + '                            ' + str(unit_certificate * 500))
+    can.drawString(358, 224, str(syllabus) + '                            ' + str(syllabus * 500))
+    
+    sum = graduation_certificate + expected_graduation_certificate + transcript_main + transcript_major + health_form + recommendation_president + recommendation_department + survey + unit_certificate + syllabus
+
+    sum_price = graduation_certificate * 600 + expected_graduation_certificate * 600 + transcript_main * 1000 + transcript_major * 1000 + health_form * 500 + recommendation_president * 1000 + recommendation_department * 0 + survey * 2000 + unit_certificate * 600 + syllabus * 2000
+
+    
+    can.drawString(358, 161, str(sum) + '                            ' + str(sum_price))
+    
+    can.save()
+
+    # Move the BytesIO position to the beginning
+    packet.seek(0)
+
+    # Create a new PDF reader for the canvas content
+    new_pdf = PdfReader(packet)
+
+    # Merge the canvas content with the existing pages
+    for page_num in range(len(result_pdf.pages)):
+        page = result_pdf.pages[page_num]
+        page.merge_page(new_pdf.pages[page_num])
+
+    # Create a response with the merged PDF
+    response = HttpResponse(content_type='application/pdf')
+    response['Content-Disposition'] = f'filename="application_{pk}.pdf"'
+    result_pdf.write(response)
+
+    return response
+
+@login_required
+def application_list(request):
+    user = request.user
+    # ログインユーザーに関連する申請書の一覧を取得
+    applications = Application.objects.filter(user=user)
     
     params = {
-        'data': page.get_page(num)  # Always display the first page initially
+        'applications': applications,
     }
-    
-    return render(request, 'company.html', params)
+
+    return render(request, 'application_list.html', params)

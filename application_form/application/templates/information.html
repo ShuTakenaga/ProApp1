@@ -3,49 +3,61 @@
 {% load static %}
 
 {% block content %}
-
   <div class="main">
-    {% if messages %}
-      <ul class='list-unstyled'>
-        {% for message in messages %}
-          <li {% if message.tag %} class='{{ messages.tags}}' {% endif %}>{{ messages }}</li>
-        {% endfor %}
-      </ul>
-    {% endif %}
+    <h1 style='font-weight:bold;'>アカウント情報</h1><br>
+    <p>名前 :
+      {{ user.last_name }}
+      {{ user.first_name }}</p>
 
-    <div class="contents">
-      <h1 style='font-weight:bold;'>アカウント情報</h1><br>
-      <p>名前 :
-        {{ user.last_name }}
-        {{ user.first_name }}</p>
+    <p>フリガナ :
+      {{ user.account.last_name_furigana }}
+      {{ user.account.first_name_furigana }}</p>
 
-      <p>フリガナ :
-        {{ user.account.last_name_furigana }}
-        {{ user.account.first_name_furigana }}</p>
+    <p>学年 :
+      {{ user.account.grade }}年</p>
 
-      <p>学年 :
-        {{ user.account.grade }}年</p>
+    <p>学科 :
+      {{ user.account.department }}</p>
 
-      <p>学科 :
-        {{ user.account.department }}</p>
+    <p>番号 :
+      {{ user.account.classnumber }}</p>
 
-      <p>学籍番号 :
-        {{ user.account.schoolnumber }}</p>
+    <p>学籍番号 :
+      {{ user.account.schoolnumber }}</p>
 
-      <p>生年月日 :
-        {{ user.account.birthdate }}</p>
+    <p>生年月日 :
+      {{ user.account.birthdate }}</p>
 
-      <p>郵便番号 :
-        {{ user.account.addressnumber }}</p>
+    <p>年齢 :
+      {{ user.account.age }} 歳</p>
 
-      <p>住所 :
-        {{ user.account.address }}</p>
+    <p>郵便番号 :
+      {{ user.account.addressnumber }}</p>
 
-      <p>電話番号 :
-        {{ user.account.mobilenumber }}</p>
+    
 
-    </div>
+    <p>住所 :
+      {{ user.account.address }}</p>
+
+    <p>電話番号 :
+      0{{ user.account.mobilenumber }}</p>
+
+    <p>保護者の了承 :
+      {% if user.account.parent %}
+        ○
+      {% endif %}
+
+    <p>条件付き進級者 :
+      {% if user.account.promotion %}
+        ○
+      {% else %}
+        X
+      {% endif %}
+    
+    <br><br>
+      <a class = 'btn btn-info link-light'  href="{% url 'edit_account'%}" role="button">編集</a>
   </div>
+  
 
   <div class="adjustment"></div>
 

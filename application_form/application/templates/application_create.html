@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class="main">
+    <div class="copy-container">
+      <h2 class="title">申請書作成</h2>
+      <p>申請書作成に必要な情報を入力しましょう。</p>
+    </div>
+
+    <div class="container">
+      <h3>{{ company.name }} に対する申請書</h3>
+      <form method="POST">
+        {% csrf_token %}
+        {{ form.submit_company.as_hidden }}
+        {{ form.as_p }}
+        <input type="submit" value="申請">
+      </form>
+    </div>
+
+  </div>
+
+{% endblock content %}
+
+{% block footer %}
+{% endblock footer %}

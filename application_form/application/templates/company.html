@@ -22,31 +22,41 @@
         <tr>
           <th>求人番号</th>
           <th>会社名</th>
+          {% if user.account.department == 'AD' %}
           <th>AD</th>
+          {% endif %}
+          {% if user.account.department == 'EE' %}
           <th>EE</th>
+          {% endif %}
+          {% if user.account.department == 'ME' %}
           <th>ME</th>
+          {% endif %}
+          {% if user.account.department == 'CS' %}
           <th>CS</th>
+          {% endif %}
           <th>全</th>
+          {% if user.account.department == 'AC' %}
           <th>AC</th>
+          {% endif %}
           <th>都道府県</th>
           <th>住所</th>
-          {% comment %} <th>TEL</th>
-          <th>担当</th> {% endcomment %}
+          <th>TEL</th>
+          <th>担当</th>
           <th>勤務地</th>
           <th>推薦/自由</th>
-          {% comment %} <th>応募方法</th> {% endcomment %}
+          <th>応募方法</th>
           <th>選考日</th>
-          {% comment %} <th>呼称</th>
+          {% comment %} <th>呼称</th> {% endcomment %}
           <th>資本金</th>
-          <th>従業員(人)</th> {% endcomment %}
+          <th>従業員(人)</th>
           <th>業種</th>
-          {% comment %} <th>事業内容</th> {% endcomment %}
+          <th>事業内容</th>
           <th>職種</th>
           <th>ホームページ</th>
-          {% comment %} <th>メールアドレス</th> {% endcomment %}
+          <th>メールアドレス</th>
           <th>既卒</th>
           <th>障がい者採用</th>
-          {% comment %} <th>PDF</th> {% endcomment %}
+          <th>PDF</th>
           <th>日付</th>
         </tr>
 
@@ -54,60 +64,85 @@
           <tr>
             <td>
               {{ company.number }}
+
+
             </td>
             <td class='company'>
-              <a href="#" style='font-weight:bold;' onclick="openModal('{{ company.name }}', '{{ company.address }}', '{{ company.tel }}', '{{ company.web }}', '{{ company.detail | escapejs }}')">{{ company.name }}</a>
+              <a style = 'font-weight:bold' href="{% url 'application_create' company_name=company.name %}">{{ company.name }}</a>
+              
+
             </td>
+            
+            {% if user.account.department == 'AD' %}
             <td>
-              {% if company.AD %}
-                {{ company.AD }}
+              {% if company.AD is not None %}
+              {{ company.AD }}
               {% endif %}
             </td>
+            {% endif %}
+          
+          
+            {% if user.account.department == 'EE' %}
             <td>
-              {% if company.ED %}
-                {{ company.ED }}
+              {% if company.EE is not None %}
+              {{ company.EE }}
               {% endif %}
             </td>
+            {% endif %}
+            
+            {% if user.account.department == 'ME' %}
             <td>
-              {% if company.ME %}
-                {{ company.ME }}
+              {% if company.ME is not None %}
+              {{ company.ME }}
               {% endif %}
             </td>
+            {% endif %}
+          
+            
+            {% if user.account.department == 'CS' %}
             <td>
-              {% if company.CS %}
-                {{ company.CS }}
+              {% if company.EE is not None %}
+              {{ company.EE }}
               {% endif %}
             </td>
+            {% endif %}
+
             <td>
-              {% if company.ALL %}
-                {{ company.ALL }}
+            {% if company.ALL %}
+            
+              {{ company.ALL }}
+            
+            {% endif %}
+            </td>
+            
+            {% if user.account.department == 'AC' %}
+            <td>
+              {% if company.AC is not None %}
+              {{ company.AC }}
               {% endif %}
             </td>
-            <td>
-              {% if company.AC %}
-                {{ company.AC }}
-              {% endif %}
-            </td>
+            {% endif %}
+            
             <td>{{ company.prefecture }}</td>
             <td>{{ company.address }}</td>
-            {% comment %}<td>{{ company.tel }}</td> 
-            <td>{{ company.PIC }}</td>{% endcomment %}
+            <td>{{ company.tel }}</td> 
+            <td>{{ company.PIC }}</td>
             <td>
               {% if company.workplace != 'nan' %}
                 {{ company.workplace }}
               {% endif %}
             </td>
             <td>{{ company.qualified }}</td>
-            {% comment %} <td>{{ company.method }}</td> {% endcomment %}
+            <td>{{ company.method }}</td>
             <td>{{ company.selection_day }}</td>
-            {% comment %} <td>{{ company.naming }}</td>
+            {% comment %} <td>{{ company.naming }}</td> {% endcomment %}
             <td>{{ company.money }}</td>
-            <td>{{ company.employee }}</td> {% endcomment %}
+            <td>{{ company.employee }}</td>
             <td>{{ company.type }}</td>
-            {% comment %} <td>{{ company.detail }}</td> {% endcomment %}
+            <td>{{ company.detail }}</td>
             <td>{{ company.occupation }}</td>
             <td><a href='{{ company.web }}'>{{ company.web }}</a></td>
-            {% comment %} <td>{{ company.mail }}</td> {% endcomment %}
+            <td>{{ company.mail }}</td>
             <td>
               {% if company.graduated != 'nan' %}
                 {{ company.graduated }}
@@ -118,7 +153,7 @@
                 {{ company.disabled }}
               {% endif %}
             </td>
-            {% comment %} <td>{{ company.PDF }}</td> {% endcomment %}
+            <td>{{ company.PDF }}</td>
             <td>{{ company.date }}</td>
           </tr>
         {% endfor %}
@@ -134,8 +169,11 @@
       <p id="modalCompanyAddress"></p>
       <p id="modalCompanyTel"></p>
       <p id="modalCompanyWeb"></p>
-      <p id="modalCompanyDetail">{{ company.detail }}</p>
-      <button type="button" class="neumophic-btn btn btn-info">申請</button>
+      <p id="modalCompanyDetail"></p>
+      {% comment %} <a class='btn btn-info' href="{% url 'application_create' company_name=data.name %}">申請</a> {% endcomment %}
+      <div id="applicationLinkContainer"></div>
+      
+
     </div>
   </div>
 
@@ -188,6 +226,7 @@
 {% block footer %}{% endblock footer %}
 
 <style>
+  
 
   .table th {
     border: 2px solid #eee;
@@ -234,6 +273,7 @@
     align-items: center;
     justify-content: center;
     z-index: 3;
+    
   }
   
   .modal-content {
@@ -245,6 +285,7 @@
     padding: 20px;
     position: relative;
     margin: auto; /* Center the modal horizontally */
+    
   }
   
   .close {
@@ -258,12 +299,14 @@
 
 <script>
   function openModal(name, address, tel, web, detail) {
+    event.preventDefault();
+    
     document.getElementById('modalCompanyName').innerHTML = name;
     document.getElementById('modalCompanyAddress').innerHTML = '住所: ' + address;
     document.getElementById('modalCompanyTel').innerHTML = 'TEL: ' + tel;
     document.getElementById('modalCompanyWeb').innerHTML = 'Website: ' + web;
     document.getElementById('modalCompanyDetail').innerHTML = '詳細:' + detail;
-  
+    
     // Set the display property to 'flex' when opening the modal
     document.getElementById('companyModal').style.display = 'flex';
   }

@@ -1,0 +1,38 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class ='main'>
+  <div class = 'container'>
+    <h1 style = 'font-weight: bold;'>申請書詳細</h1><br>
+
+    <p>作成日時: {{ application.created_at }}</p>
+    
+    <p>更新日時: {{ application.updated_at }}</p>
+
+    <br>
+
+    <p>推薦: {{ application.qualified }}</p>
+    
+
+    <p>提出先名(会社名): {{ application.submit_company }}</p>
+    <p>提出先郵便番号: {{ application.submit_address_number }}</p>
+    <p>提出先住所: {{ application.submit_address }}</p>
+    <p>提出先電話番号: {{ application.submit_tel }}</p>
+    <p>締切: {{ application.deadline }}</p>
+    
+    <br>
+    
+    <form method="post" action="{% url 'generate_pdf' pk=application.pk %}">
+      {% csrf_token %}
+      <button class = 'btn btn-info' type="submit">PDFを作成する</button>
+    </form>
+    
+    <br>
+
+    <a href="{% url 'edit_application' pk=application.pk %}" class="btn btn-outline-info">申請書を編集する</a>
+
+  </div>
+
+</div>
+  
+{% endblock %}

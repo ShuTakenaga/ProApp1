@@ -6,18 +6,23 @@
 
   <div class="main">
     <div class="copy-container">
-      <h2 class="title">ようこそ{{ user.username }}さん</h2>
+      <h2 class="title" style = 'font-weight: bold;'>ようこそ {{ user.username }} さん</h2>
       <div>このサービスでは学生が就職の申請をする際に必要な就職手続き依頼書を作成することができます。</div>
     </div>
 
     <div class="contents">
       <h3>
-        <a href="{% url 'company' %}">企業一覧を閲覧・申請書の作成</a>
+        <a style = 'font-weight: bold;' href="{% url 'company' %}">企業一覧を閲覧・申請書の作成</a>
       </h3>
       <p class="explanation">こちらのページでは学校側が掲示している企業の求人一覧を閲覧、または申請書の作成が可能です。</p>
       <br>
       <h3>
-        <a href="{% url 'information'%}">ユーザー情報を編集する</a>
+        <a style = 'font-weight: bold;' href="{% url 'application_list' %}">作成した申請書の編集・履歴</a>
+      </h3>
+      <p class="explanation">こちらのページでは過去に作成した申請書の履歴および編集をすることができます。</p>
+      <br>
+      <h3>
+        <a style = 'font-weight: bold;' href="{% url 'information'%}">ユーザー情報を編集する</a>
       </h3>
       <p class="explanation">こちらのページでは登録している名前や生年月日、住所などのユーザー情報を変更及びアカウントの削除をすることができます。</p>
     </div>
