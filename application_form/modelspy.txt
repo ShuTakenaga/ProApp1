@@ -1,0 +1,85 @@
+from django.shortcuts import render, redirect
+from django.contrib.auth.decorators import login_required
+
+from django.views.generic import CreateView
+
+from django.urls import reverse_lazy
+from django.http import HttpResponse
+from django.template import context, loader
+from django import template
+from django.contrib.auth.mixins import LoginRequiredMixin
+
+from .models import Account
+from .forms import AccountForm
+
+from django.contrib.auth.models import User
+
+def login(request):
+    return render(request, 'login.html')
+
+@login_required
+def home(request):
+    # model = FirstModel
+    # template_name = 'home'
+    # context_object_name = 'account'
+    # return render(request, 'home.html')
+    
+    template = loader.get_template('home.html')
+    # accounts = Account.objects.all
+    
+    user = request.user
+    
+    accounts = Account()
+    accounts.user = user
+    
+    # accounts = FirstModel.objects.get(id == 9)
+    
+    context = {
+        'accounts' : accounts,
+    }
+    
+    return HttpResponse(template.render(context, request))
+    # return render(request, 'home.html', {accounts : accounts})
+
+# class AccountCreate(LoginRequiredMixin, CreateView):
+#     template_name = 'accountcreate.html'
+#     model = Account
+#     fields = ('grade', 'department', 'schoolnumber', 'classnumber', 'furigana', 'name', 'birthdate', 'age', 'address', 'addressnumber', 'mobilenumber', 'promotion')
+#     success_url = reverse_lazy('home')
+#     login_url = '/login/'
+    
+@login_required
+def account_create(request):
+    # account = {}
+        
+    # account['form'] = AccountForm()
+    
+    if request.method == 'POST':
+        form = AccountForm(request.POST)
+        
+        user = request.user
+        
+        account = form.save(commit=False)
+        # account.grade = request.POST['grade']  # またはフォームから grade を取得する方法を使用
+        
+        account = Account(**form.cleaned_data)
+        
+        # https://qiita.com/siruku6/items/5b1378eca8cfd7353143
+        
+        # account.schoolnumber = schoolnumber
+        account.save()
+        
+        return redirect(to = '/')
+    
+    else:
+        form = AccountForm()
+    
+    params = {
+        'form' : form
+    }
+    
+    return render(request, 'accountcreate.html', params)
+
+@login_required
+def company(request):
+    return render(request, 'company.html')

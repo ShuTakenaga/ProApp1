@@ -26,7 +26,7 @@ SECRET_KEY = 'django-insecure-hkok@$d&y8ehw7fp(m9%&&29n_d1ui3%sor(l+!uvcrf5xt3p_
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['192.168.11.2', 'localhost']
 
 
 # Application definition
@@ -79,7 +79,6 @@ TEMPLATES = [
 
 WSGI_APPLICATION = 'application_form.wsgi.application'
 
-
 # Database
 # https://docs.djangoproject.com/en/4.2/ref/settings/#databases
 
@@ -113,7 +112,7 @@ AUTH_PASSWORD_VALIDATORS = [
 # Internationalization
 # https://docs.djangoproject.com/en/4.2/topics/i18n/
 
-LANGUAGE_CODE = 'en-us'
+LANGUAGE_CODE = 'ja-jp'
 
 TIME_ZONE = 'UTC'
 
@@ -125,7 +124,11 @@ USE_TZ = True
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/4.2/howto/static-files/
 
-STATIC_URL = 'static/'
+STATIC_URL = '/static/'
+STATICFILES_DIRS = [os.path.join(BASE_DIR, 'static')]
+
+# 以下の行は本番環境で静的ファイルを収集するために使用されます
+STATIC_ROOT = os.path.join(BASE_DIR, 'application/static')
 
 # Default primary key field type
 # https://docs.djangoproject.com/en/4.2/ref/settings/#default-auto-field
@@ -136,9 +139,21 @@ AUTHENTICATION_BACKENDS = [
     'social_core.backends.google.GoogleOAuth2',
     'django.contrib.auth.backends.ModelBackend',
 ]
+
 LOGIN_URL = 'login'
-LOGIN_REDIRECT_URL = 'home'
+LOGIN_REDIRECT_URL = 'accountcreate'
+
 LOGOUT_URL = 'logout'
 LOGOUT_REDIRECT_URL = 'login'
+
 SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '114123038809-5lat3pugr6pnfj3696c43mp6hvmu5ntf.apps.googleusercontent.com'
 SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
+
+SESSION_COOKIE_AGE = 3600 # 1時間
+SESSION_SAVE_EVERY_REQUEST = True # 後にいずれかのページをロードしてから SESSION_COOKIE_AGE 秒後に期限切れ
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True # 設定された期限に関係なく、ブラウザを閉じたらセッションを終了
+
+# SOCIAL_AUTH_REDIRECT_IS_HTTPS = True
+
+# AUTH_USER_MODEL = 'application.Account'
+

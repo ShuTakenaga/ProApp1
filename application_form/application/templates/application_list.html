@@ -1,0 +1,32 @@
+<!-- application_list.html -->
+
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class='main'>
+        <div class='container'>
+            <h1 style='font-weight:bold;'>申請書の履歴</h1>
+            <br>
+            {% if applications %}
+            {% for application in applications %}
+            <ol class="list-group">
+                
+                <li class="list-group-item d-flex justify-content-between align-items-start">
+                  <div class="ms-2 me-auto">
+                    <div class="fw-bold"><a href="{% url 'application_detail' pk=application.pk %}">{{ application.submit_company }}</a></div>
+                    {{ application.created_at }} 
+                    {% if application.created_at|date:"Y-m-d H:i" != application.updated_at|date:"Y-m-d H:i" %}
+                    - {{ application.updated_at }}
+                    {% endif %}
+                  </div>
+                </li>
+               
+            </ol>
+            {% endfor %}
+            {% else %}
+            <h4>まだ申請書がありません。</h4>
+            {% endif %}
+        </div>
+    </div>
+    
+{% endblock %}

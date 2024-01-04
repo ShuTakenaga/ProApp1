@@ -1,0 +1,339 @@
+{% extends 'base.html' %}
+
+{% load static %}
+
+{% block content %}
+
+  <div class='container mt-4'>
+    <br>
+    <p>企業番号または企業名を入力することでこちらから企業検索をすることができます。</p>
+
+    <form method='get' id="search-form">
+      <label class = 'form-label'>検索</label>
+      <input type="text" id="search_keyword" name="search_keyword" class='form-control' placeholder="企業番号または企業名を入力" value="{{ request.GET.search_keyword }}">
+      <button type="submit" aria-label="検索" class="btn btn-info">Search</button>
+      <button type="button" aria-label="クリア" onclick='clearSearch()' class="btn btn-outline-info">Clear</button>
+    </form>
+
+    <br><br><br>
+
+    <div class="table-wrap table-responsive">
+      <table class="table table-striped border">
+        <tr>
+          <th>求人番号</th>
+          <th>会社名</th>
+          {% if user.account.department == 'AD' %}
+          <th>AD</th>
+          {% endif %}
+          {% if user.account.department == 'EE' %}
+          <th>EE</th>
+          {% endif %}
+          {% if user.account.department == 'ME' %}
+          <th>ME</th>
+          {% endif %}
+          {% if user.account.department == 'CS' %}
+          <th>CS</th>
+          {% endif %}
+          <th>全</th>
+          {% if user.account.department == 'AC' %}
+          <th>AC</th>
+          {% endif %}
+          <th>都道府県</th>
+          <th>住所</th>
+          <th>TEL</th>
+          <th>担当</th>
+          <th>勤務地</th>
+          <th>推薦/自由</th>
+          <th>応募方法</th>
+          <th>選考日</th>
+          {% comment %} <th>呼称</th> {% endcomment %}
+          <th>資本金</th>
+          <th>従業員(人)</th>
+          <th>業種</th>
+          <th>事業内容</th>
+          <th>職種</th>
+          <th>ホームページ</th>
+          <th>メールアドレス</th>
+          <th>既卒</th>
+          <th>障がい者採用</th>
+          <th>PDF</th>
+          <th>日付</th>
+        </tr>
+
+        {% for company in data %}
+          <tr>
+            <td>
+              {{ company.number }}
+
+
+            </td>
+            <td class='company'>
+              <a style = 'font-weight:bold' href="{% url 'application_create' company_name=company.name %}">{{ company.name }}</a>
+              
+
+            </td>
+            
+            {% if user.account.department == 'AD' %}
+            <td>
+              {% if company.AD is not None %}
+              {{ company.AD }}
+              {% endif %}
+            </td>
+            {% endif %}
+          
+          
+            {% if user.account.department == 'EE' %}
+            <td>
+              {% if company.EE is not None %}
+              {{ company.EE }}
+              {% endif %}
+            </td>
+            {% endif %}
+            
+            {% if user.account.department == 'ME' %}
+            <td>
+              {% if company.ME is not None %}
+              {{ company.ME }}
+              {% endif %}
+            </td>
+            {% endif %}
+          
+            
+            {% if user.account.department == 'CS' %}
+            <td>
+              {% if company.EE is not None %}
+              {{ company.EE }}
+              {% endif %}
+            </td>
+            {% endif %}
+
+            <td>
+            {% if company.ALL %}
+            
+              {{ company.ALL }}
+            
+            {% endif %}
+            </td>
+            
+            {% if user.account.department == 'AC' %}
+            <td>
+              {% if company.AC is not None %}
+              {{ company.AC }}
+              {% endif %}
+            </td>
+            {% endif %}
+            
+            <td>{{ company.prefecture }}</td>
+            <td>{{ company.address }}</td>
+            <td>{{ company.tel }}</td> 
+            <td>{{ company.PIC }}</td>
+            <td>
+              {% if company.workplace != 'nan' %}
+                {{ company.workplace }}
+              {% endif %}
+            </td>
+            <td>{{ company.qualified }}</td>
+            <td>{{ company.method }}</td>
+            <td>{{ company.selection_day }}</td>
+            {% comment %} <td>{{ company.naming }}</td> {% endcomment %}
+            <td>{{ company.money }}</td>
+            <td>{{ company.employee }}</td>
+            <td>{{ company.type }}</td>
+            <td>{{ company.detail }}</td>
+            <td>{{ company.occupation }}</td>
+            <td><a href='{{ company.web }}'>{{ company.web }}</a></td>
+            <td>{{ company.mail }}</td>
+            <td>
+              {% if company.graduated != 'nan' %}
+                {{ company.graduated }}
+              {% endif %}
+            </td>
+            <td>
+              {% if company.disabled != 'nan' %}
+                {{ company.disabled }}
+              {% endif %}
+            </td>
+            <td>{{ company.PDF }}</td>
+            <td>{{ company.date }}</td>
+          </tr>
+        {% endfor %}
+
+      </table>
+    </div>
+  </div>
+
+  <div id="companyModal" class="modal">
+    <div class="modal-content">
+      <span class="close" onclick="closeModal()">&times;</span>
+      <h2 id="modalCompanyName"></h2>
+      <p id="modalCompanyAddress"></p>
+      <p id="modalCompanyTel"></p>
+      <p id="modalCompanyWeb"></p>
+      <p id="modalCompanyDetail"></p>
+      {% comment %} <a class='btn btn-info' href="{% url 'application_create' company_name=data.name %}">申請</a> {% endcomment %}
+      <div id="applicationLinkContainer"></div>
+      
+
+    </div>
+  </div>
+
+
+  <nav>
+    <ul class='pagination'>
+      {% if data.has_previous %}
+        <li>
+          <a class='page-link text-primary d-inline-block' href="{% url 'company_pagination' num=data.previous_page_number %}{% if request.GET.search_keyword %}?search_keyword={{ request.GET.search_keyword }}{% endif %}">back</a>
+        </li>
+      {% else %}
+        <li class='disabled'>
+          <div class='page-link text-secondary d-inline-block disabled' href='#'>back</div>
+        </li>
+      {% endif %}
+
+      {% for link_page in data.paginator.page_range %}
+        {% if link_page %}
+          {% if link_page == data.number %}
+            <li class='disabled'>
+              <div class='page-link text-secondary d-inline-block disabled' href='#'>
+                {{ link_page }}
+              </div>
+            </li>
+          {% else %}
+            <li>
+              <a class='page-link text-primary d-inline-block' href="{% url 'company_pagination' num=link_page %}{% if request.GET.search_keyword %}?search_keyword={{ request.GET.search_keyword }}{% endif %}">{{ link_page }}</a>
+            </li>
+          {% endif %}
+        {% else %}
+          <li class='disabled'>
+            <a class='page-link text-secondary d-inline-block text-muted' href="#">...</a>
+          </li>
+        {% endif %}
+      {% endfor %}
+
+      {% if data.has_next %}
+        <li>
+          <a class='page-link text-primary d-inline-block' href="{% url 'company_pagination' num=data.next_page_number %}{% if request.GET.search_keyword %}?search_keyword={{ request.GET.search_keyword }}{% endif %}">next</a>
+        </li>
+      {% else %}
+        <li class='disabled'>
+          <div class='page-link text-secondary d-inline-block disabled' href='#'>next</div>
+        </li>
+      {% endif %}
+    </ul>
+  </nav>
+</div>
+
+{% block footer %}{% endblock footer %}
+
+<style>
+  
+
+  .table th {
+    border: 2px solid #eee;
+    white-space: nowrap;
+  }
+
+  .table td {
+    border: 2px solid #eee;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 400px;
+    position: relative;
+  }
+
+  .table td:hover{
+    overflow: visible;
+    white-space: normal;
+    z-index: 1;
+  }
+
+  .tooltip {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    border: 1px solid #ddd;
+    padding: 10px;
+    z-index: 2;
+  }
+
+  .table td:hover .tooltip{
+    display: block;
+  }
+
+  /* Modal styles */
+  .modal {
+    display: none;
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent background */
+    align-items: center;
+    justify-content: center;
+    z-index: 3;
+    
+  }
+  
+  .modal-content {
+    width: 100%; /* Adjust the width as needed */
+    max-width: 800px; /* Set a maximum width if desired */
+    background-color: #fff;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    border-radius: 10px;
+    padding: 20px;
+    position: relative;
+    margin: auto; /* Center the modal horizontally */
+    
+  }
+  
+  .close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    font-size: 20px;
+    cursor: pointer;
+  }
+</style>
+
+<script>
+  function openModal(name, address, tel, web, detail) {
+    event.preventDefault();
+    
+    document.getElementById('modalCompanyName').innerHTML = name;
+    document.getElementById('modalCompanyAddress').innerHTML = '住所: ' + address;
+    document.getElementById('modalCompanyTel').innerHTML = 'TEL: ' + tel;
+    document.getElementById('modalCompanyWeb').innerHTML = 'Website: ' + web;
+    document.getElementById('modalCompanyDetail').innerHTML = '詳細:' + detail;
+    
+    // Set the display property to 'flex' when opening the modal
+    document.getElementById('companyModal').style.display = 'flex';
+  }
+  
+  function closeModal() {
+    // Set the display property to 'none' when closing the modal
+    document.getElementById('companyModal').style.display = 'none';
+  }
+  
+  // Close modal if the user clicks outside of it
+  window.onclick = function (event) {
+    var modal = document.getElementById('companyModal');
+    if (event.target == modal) {
+      closeModal();
+    }
+  };
+
+  function clearSearch() {
+    // Get the search input element by its ID
+    var searchInput = document.getElementById('search_keyword');
+  
+    // Check if the search input element exists
+    if (searchInput) {
+      // Set the value of the search input to an empty string
+      searchInput.value = '';
+    }
+  }
+</script>
+
+{% endblock content%}
