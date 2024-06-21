@@ -146,9 +146,6 @@ LOGIN_REDIRECT_URL = 'accountcreate'
 LOGOUT_URL = 'logout'
 LOGOUT_REDIRECT_URL = 'login'
 
-SOCIAL_AUTH_GOOGLE_OAUTH2_KEY = '114123038809-5lat3pugr6pnfj3696c43mp6hvmu5ntf.apps.googleusercontent.com'
-SOCIAL_AUTH_GOOGLE_OAUTH2_SECRET = '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'
-
 SESSION_COOKIE_AGE = 3600 # 1時間
 SESSION_SAVE_EVERY_REQUEST = True # 後にいずれかのページをロードしてから SESSION_COOKIE_AGE 秒後に期限切れ
 SESSION_EXPIRE_AT_BROWSER_CLOSE = True # 設定された期限に関係なく、ブラウザを閉じたらセッションを終了
