@@ -64,10 +64,11 @@ class ApplicationForm(forms.ModelForm):
         # self.fields['edicational_condition'].widget.attrs['class'] = ''
         # self.fields['procedure_pay'].widget.attrs['class'] = ''
         # self.fields['procedure_contract'].widget.attrs['class'] = ''
+        
 
     class Meta:
         model = Application
-        fields = ('qualified', 'submit_company', 'submit_address_number', 'submit_address', 'submit_tel','deadline', 'graduation_certificate', 'expected_graduation_certificate', 'transcript_main', 'transcript_major', 'health_form', 'recommendation_president', 'recommendation_department', 'survey', 'unit_certificate', 'syllabus')
+        fields = ('qualified', 'submit_company', 'submit_tel', 'submit_address', 'submit_address_number' ,'deadline', 'graduation_certificate', 'expected_graduation_certificate', 'transcript_main', 'transcript_major', 'health_form', 'recommendation_president', 'recommendation_department', 'survey', 'unit_certificate', 'syllabus')
         
         # 'student_condition_date', 'edicational_condition', 'edicational_condition_date', 'procedure_pay', 'procedure_contract', 
         

@@ -131,3 +131,6 @@ class Application(models.Model):
     survey = models.IntegerField(verbose_name='健康診断票写', null=True, blank=True)
     unit_certificate = models.IntegerField(verbose_name='単位取得証明書', null=True, blank=True)
     syllabus = models.IntegerField(verbose_name='シラバス', null=True, blank=True)
+    
+    def __str__(self):
+        return str(self.user) + ' ' + self.submit_company

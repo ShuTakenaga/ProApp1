@@ -1,45 +1,28 @@
 from django.shortcuts import render, redirect, get_object_or_404
 from django.contrib.auth.decorators import login_required, user_passes_test
-
 from django.views.generic import CreateView
-
 from django.urls import reverse_lazy
 from django.http import HttpResponse
-from django.template import context, loader
 from django import template
 from django.contrib.auth.mixins import LoginRequiredMixin
-
 from .models import Account, Company, Application
 from .forms import AccountForm, CompanySearchForm, ApplicationForm, EditAccountForm, EditApplicationForm
-
 from django.contrib.auth.models import User
-
 from django.contrib import messages
-
 import pandas as pd
-
 from django.core.files.storage import FileSystemStorage
-
 from django.db.utils import IntegrityError
-
 from django.core.paginator import Paginator, EmptyPage
-
 from reportlab.pdfgen import canvas
 from reportlab.lib.pagesizes import letter
 from PyPDF2 import PdfReader, PdfWriter
 from django.templatetags.static import static
-
 from reportlab.pdfbase.cidfonts import UnicodeCIDFont
-
 from io import BytesIO
 import os
-
 from reportlab.pdfbase import pdfmetrics
 from reportlab.pdfbase.ttfonts import TTFont
-
 from django.db.models import Q
-
-
 
 def is_superuser(user):
     return user.is_superuser
@@ -195,11 +178,15 @@ def company(request, num=1):
         
         user_department = request.user.account.department
         
+        
         # If there's a search query, filter the data
         if search_keyword:
             if user_department == 'ME':
-                    data = Company.objects.filter(Q(ALL=True)| Q(ME=True) )
-                    data = data.filter(number__icontains=search_keyword) | data.filter(name__icontains=search_keyword)
+                data = Company.objects.filter(Q(ALL=True)| Q(ME=True) )
+                data = data.filter(number__icontains=search_keyword) | data.filter(name__icontains=search_keyword)
+            if user_department == 'CS':
+                data = Company.objects.filter(Q(ALL=True)| Q(CS=True) )
+                data = data.filter(number__icontains=search_keyword) | data.filter(name__icontains=search_keyword)
         else:
             if user_department == 'AD':
                 data = Company.objects.filter(Q(AD__isnull=False) | Q(ALL__isnull=False))
@@ -226,45 +213,57 @@ def company(request, num=1):
     
 @login_required
 def application_create(request, company_name):
-    if Account.objects.filter(user=request.user).exists():
-        company = get_object_or_404(Company, name=company_name)
-
-        # 既存の申請書を取得
-        existing_application = Application.objects.filter(user=request.user, company=company).first()
-
-        if existing_application:
-            # 既に申請している場合、申請書の詳細画面にリダイレクト
-            return redirect('application_detail', pk=existing_application.pk)
-
-        if request.method == 'POST':
-            form = ApplicationForm(request.POST)
-
-            user = request.user
-
-            if form.is_valid():
-                application = form.save(commit=False)
-                application.user = user
-                application.company = company  # companyを使用
-                application.save()
-                return redirect('application_detail', pk=application.pk)
-        else:
-            if company.qualified == '推薦':
-                form = ApplicationForm(initial={
-                    'submit_company': company.name,
-                    'submit_address': company.prefecture + company.address,
-                    'submit_tel': company.tel,
-                    'qualified': True,
-                })  # 初期値としてcompany.nameを設定
-            else:
-                form = ApplicationForm(initial={
-                    'submit_company': company.name,
-                    'submit_address': company.prefecture + company.address,
-                    'submit_tel': company.tel,
-                })  # 初期値としてcompany.nameを設定
-
-        return render(request, 'application_create.html', {'form': form})
+    if request.user.account.promotion == True:
+        return redirect('edit_account')
     else:
-        return redirect('accountcreate')
+        if Account.objects.filter(user=request.user).exists():
+            # company = get_object_or_404(Company, name=company_name)
+            companies = Company.objects.filter(name=company_name)
+
+            if companies.exists():
+                company = companies.first()  # 例: 最初のオブジェクトを取得
+            else:
+                # オブジェクトが存在しない場合の処理
+                return redirect('comapny')
+
+
+            # 既存の申請書を取得
+            existing_application = Application.objects.filter(user=request.user, company=company).first()
+
+            if existing_application:
+                # 既に申請している場合、申請書の詳細画面にリダイレクト
+                return redirect('application_detail', pk=existing_application.pk)
+
+            if request.method == 'POST':
+                form = ApplicationForm(request.POST)
+
+                user = request.user
+
+                if form.is_valid():
+                    application = form.save(commit=False)
+                    application.user = user
+                    application.company = company  # companyを使用
+                    application.save()
+                    return redirect('application_detail', pk=application.pk)
+            else:
+                if company.qualified == '推薦':
+                    form = ApplicationForm(initial={
+                        'submit_company': company.name,
+                        'submit_address': company.prefecture + company.address,
+                        'submit_tel': company.tel,
+                        'qualified': True,
+                    })  # 初期値としてcompany.nameを設定
+                else:
+                    form = ApplicationForm(initial={
+                        'submit_company': company.name,
+                        'submit_address': company.prefecture + company.address,
+                        'submit_tel': company.tel,
+                    })  # 初期値としてcompany.nameを設定
+
+            return render(request, 'application_create.html', {'form': form})
+        else:
+            return redirect('accountcreate')
+    
 @login_required
 def edit_application(request, pk):
     application = get_object_or_404(Application, pk=pk)
@@ -298,20 +297,6 @@ def application_detail(request, pk):
     }
 
     return render(request, 'application_detail.html', context)
-
-# @login_required
-# def edit_application(request, pk):
-#     application = get_object_or_404(Application, pk=pk)
-
-#     if request.method == 'POST':
-#         form = ApplicationForm(request.POST, instance=application)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('application_detail', pk=pk)
-#     else:
-#         form = ApplicationForm(instance=application)
-
-#     return render(request, 'edit_application.html', {'form': form})
 
 def generate_pdf(request, pk):
     application = get_object_or_404(Application, pk=pk)
